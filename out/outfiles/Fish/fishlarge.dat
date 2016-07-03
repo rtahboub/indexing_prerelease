@@ -1,0 +1,9 @@
+numPoints, RTree, StripedSweep128, SynchTraversal, TPRTree2D
+100000 query: 181.971 update: 2.90321 index: 123.34 query: 147.972 update: 2.8988 index: 82.6605 query: 860.69 update: 163.672 index: 797.938 
+300000 query: 1941.38 update: 8.72498 index: 1113.08 query: 1475.96 update: 8.69693 index: 617.769 query: 9565.95 update: 632.71 index: 8664.66 
+500000 query: 5809.08 update: 14.5813 index: 3170.16 query: 4345.85 update: 14.5888 index: 1656.14 query: 15956.7 update: 1614.58 index: 13108.9 
+700000 query: 11798.7 update: 20.1537 index: 6295.02 query: 8784.81 update: 20.1402 index: 3202.93 query: 34383 update: 2366.12 index: 28425.6
+900000 query: 20158.3 update: 26.0216 index: 10658.2 query: 14856.2 update: 26.0186 index: 5246.35 
+
+
+

@@ -1,0 +1,447 @@
+#
+# Makefile for indexing
+#
+
+#-lgsl -lgslcblas -lm
+
+PKG = indexing
+PKG_KIND = cmd
+
+# QLEVEL for CRTree2D
+# CXXFLAGS_LOCAL := -DQLEVEL_8
+
+
+ifeq "$(OPTLEVEL)" "opt"
+#CXXFLAGS_ALL_cmd := -g -fno-inline $(CXXFLAGS_ALL_cmd) $(CXXFLAGS_LOCAL) -DDBUTL_NDEBUG
+CXXFLAGS_ALL_cmd := -g $(CXXFLAGS_ALL_cmd) $(CXXFLAGS_LOCAL) -DDBUTL_NDEBUG
+#CXXFLAGS_ALL_cmd := -g -O3 $(CXXFLAGS_ALL_cmd) $(CXXFLAGS_LOCAL)
+else
+CXXFLAGS_ALL_cmd := -fno-inline $(CXXFLAGS_ALL_cmd) $(CXXFLAGS_LOCAL)
+endif
+
+
+
+# CXXFLAGS_Darwin_cmd_opt := -O3 -DDBUTL_NDEBUG
+# CXXFLAGS_Linux_cmd_opt := -O3 -DDBUTL_NDEBUG
+
+ifeq "$(OSNAME)" "$(LINUX_NAME)"
+IMPORT_STD := rt
+endif
+IMPORT_STD := $(IMPORTS_STD) $(IMPORT_STD) gsl gslcblas m
+
+TARGETS = $(TARGET_MAIN) $(TARGET_DATAGEN) $(TARGET_PLOT) $(TARGET_FISH) $(TARGET_CHECKTRACE)
+BUILDS = $(TARGET_MAIN) $(TARGET_DATAGEN) $(TARGET_PLOT) $(TARGET_FISH) $(TARGET_CHECKTRACE)
+
+TARGET_MAIN := $(BIN)/index.$(CMD_EXT)
+TARGET_DATAGEN := $(BIN)/datagen.$(CMD_EXT)
+TARGET_PLOT := $(BIN)/plot.$(CMD_EXT)
+TARGET_CHECKTRACE := $(BIN)/checkTrace.$(CMD_EXT)
+TARGET_FISH := $(BIN)/fishtest.$(CMD_EXT)
+
+
+# General Purpose Utilities.
+
+$(HDR)/util/AlignedMem.h:
+$(HDR)/util/Log.h:
+$(HDR)/util/RNG.h:
+$(HDR)/util/ptimer.h:
+
+$(HDR)/IndexCallBack.h:
+$(HDR)/JoinCallBack.h:
+$(HDR)/IndexLog.h:
+$(HDR)/TimingResult.h:
+
+# 2D Public API and helper classes.
+
+$(HDR)/2D/Region2D.h:
+$(HDR)/2D/TestTypes2D.h:
+$(HDR)/2D/IndexUtils2D.h:
+$(HDR)/2D/TraceWriter2D.h: $(HDR)/2D/TestTypes2D.h
+
+$(HDR)/2D/SpatialIndex2D.h: $(HDR)/2D/Region2D.h $(HDR)/IndexCallBack.h
+$(HDR)/2D/StaticSpatialIndex2D.h: $(HDR)/2D/SpatialIndex2D.h
+$(HDR)/2D/MovingSpatialIndex2D.h: $(HDR)/2D/SpatialIndex2D.h
+
+$(HDR)/2D/SpatialJoin2D.h: $(HDR)/JoinCallBack.h
+$(HDR)/2D/StaticSpatialJoin2D.h: $(HDR)/2D/SpatialJoin2D.h
+$(HDR)/2D/MovingSpatialJoin2D.h: $(HDR)/2D/SpatialJoin2D.h
+
+$(HDR)/2D/Workload2D.h: $(HDR)/2D/Region2D.h $(HDR)/2D/TestTypes2D.h
+
+$(HDR)/2D/Experiment2D.h: $(HDR)/JoinCallBack.h \
+			  $(HDR)/TimingResult.h \
+			  $(HDR)/2D/Workload2D.h \
+		          $(HDR)/2D/SpatialJoin2D.h \
+			  $(HDR)/2D/MovingSpatialJoin2D.h \
+			  $(HDR)/2D/StaticSpatialJoin2D.h
+
+
+$(HDR)/2D/AbstractJoinRunner2D.h: $(HDR)/2D/TestTypes2D.h
+
+$(HDR)/2D/JoinRunner2D.h: $(HDR)/JoinCallBack.h \
+			  $(HDR)/TimingResult.h \
+			  $(HDR)/2D/Workload2D.h
+
+$(HDR)/2D/StaticJoinRunner2D.h: $(HDR)/2D/TestTypes2D.h \
+			        $(HDR)/TimingResult.h \
+			        $(HDR)/2D/AbstractJoinRunner2D.h
+
+$(HDR)/2D/IncrementalJoinRunner2D.h: $(HDR)/2D/TestTypes2D.h \
+			             $(HDR)/TimingResult.h \
+			             $(HDR)/2D/AbstractJoinRunner2D.h
+
+$(HDR)/2D/DataGenerator.h: $(HDR)/2D/TraceWriter2D.h
+
+
+
+# Workloads
+$(HDR)/2D/workload/TraceWorkload2D.h: $(HDR)/2D/Workload2D.h \
+			  	      $(HDR)/2D/TestTypes2D.h
+
+# Data Generators
+$(HDR)/2D/data_generator/UniformGenerator.h: $(HDR)/2D/TestTypes2D.h \
+			       	   	     $(HDR)/2D/DataGenerator.h
+
+
+$(HDR)/2D/data_generator/GaussianGenerator.h: $(HDR)/2D/TestTypes2D.h \
+			       	   	      $(HDR)/2D/DataGenerator.h
+
+
+
+
+$(HDR)/2D/data_generator/Network.h:
+$(HDR)/2D/data_generator/NetworkGenerator.h: $(HDR)/2D/TestTypes2D.h \
+					     $(HDR)/2D/DataGenerator.h \
+					     $(HDR)/2D/data_generator/Network.h
+
+
+$(HDR)/2D/data_generator/fish/AggIndex2D__dcl.h:
+$(HDR)/2D/data_generator/fish/AggValues.h:
+$(HDR)/2D/data_generator/fish/FishRegion.h:
+$(HDR)/2D/data_generator/fish/oids.h:
+$(HDR)/2D/data_generator/fish/trig.h:
+$(HDR)/2D/data_generator/fish/unit.h:
+
+
+
+# ----------------------------------------------------------------------
+# Point Indexes: Add your structure here
+# ----------------------------------------------------------------------
+$(HDR)/2D/point_index/NaiveSpatialIndex2D.h: $(HDR)/2D/StaticSpatialIndex2D.h
+
+
+$(HDR)/2D/point_index/BinarySearch2D.h: $(HDR)/2D/StaticSpatialIndex2D.h \
+					$(HDR)/2D/IndexUtils2D.h
+
+$(HDR)/2D/point_index/RTree.h: $(HDR)/2D/StaticSpatialIndex2D.h \
+			       $(HDR)/2D/IndexUtils2D.h
+
+$(HDR)/2D/point_index/CRTree.h: $(HDR)/2D/StaticSpatialIndex2D.h \
+				$(HDR)/2D/IndexUtils2D.h
+
+$(HDR)/2D/point_index/TPRTree.h: $(HDR)/2D/MovingSpatialIndex2D.h \
+				 $(HDR)/2D/IndexUtils2D.h
+
+$(HDR)/2D/point_index/SimpleGrid.h: $(HDR)/2D/MovingSpatialIndex2D.h \
+				    $(HDR)/2D/IndexUtils2D.h
+
+$(HDR)/2D/point_index/Stripes.h: $(HDR)/2D/MovingSpatialIndex2D.h \
+				 $(HDR)/2D/IndexUtils2D.h
+
+$(HDR)/2D/point_index/NaiveMovingIndex2D.h: $(HDR)/2D/MovingSpatialIndex2D.h
+
+
+# ----------------------------------------------------------------------
+# Join Indexes: Add your structure here
+# ----------------------------------------------------------------------
+
+$(HDR)/2D/join_index/StaticNestedLoops2D.h: $(HDR)/2D/StaticSpatialIndex2D.h \
+	             		            $(HDR)/2D/StaticSpatialJoin2D.h
+
+$(HDR)/2D/join_index/MovingNestedLoops2D.h: $(HDR)/2D/StaticSpatialIndex2D.h \
+	             		            $(HDR)/2D/StaticSpatialJoin2D.h
+
+
+$(HDR)/2D/join_index/plane_sweep/SweepStructure.h: $(HDR)/2D/Region2D.h
+
+$(HDR)/2D/join_index/plane_sweep/ListSweep.h: \
+	$(HDR)/2D/join_index/plane_sweep/SweepStructure.h
+
+$(HDR)/2D/join_index/GenericPlaneSweep2D.h: \
+	$(HDR)/2D/StaticSpatialJoin2D.h \
+	$(HDR)/2D/IndexUtils2D.h \
+	$(HDR)/2D/join_index/plane_sweep/SweepStructure.h \
+	$(HDR)/2D/Region2D.h
+
+$(HDR)/2D/join_index/ForwardPlaneSweep.h: \
+	$(HDR)/2D/StaticSpatialJoin2D.h \
+	$(HDR)/2D/IndexUtils2D.h \
+	$(HDR)/2D/Region2D.h
+
+
+$(HDR)/2D/join_index/SynchTraversal.h: \
+	$(HDR)/2D/StaticSpatialJoin2D.h \
+	$(HDR)/2D/IndexUtils2D.h \
+	$(HDR)/2D/Region2D.h \
+	$(HDR)/2D/point_index/RTree.h
+
+
+
+$(HDR)/2D/continuous_join/AEJoin.h: \
+	$(HDR)/2D/continuous_join/AENEHelper.h \
+	$(HDR)/2D/continuous_join/AENEQueue.h
+
+
+
+# Object Files
+
+
+$(OBJ)/util/AlignedMem.$(OBJ_EXT): $(SRC)/util/AlignedMem.cpp \
+	   			   $(HDR)/util/AlignedMem.h
+
+$(OBJ)/util/ptimer.$(OBJ_EXT): $(SRC)/util/ptimer.cpp \
+	   		       $(HDR)/util/ptimer.h
+
+$(OBJ)/util/RNG.$(OBJ_EXT): $(SRC)/util/RNG.cpp \
+	   		    $(HDR)/util/RNG.h
+
+
+$(OBJ)/util/Log.$(OBJ_EXT): $(SRC)/util/Log.cpp \
+	   		    $(HDR)/util/Log.h
+
+
+
+
+
+
+$(OBJ)/TimingResult.$(OBJ_EXT): $(SRC)/TimingResult.cpp \
+	   		        $(HDR)/TimingResult.h
+
+$(OBJ)/IndexLog.$(OBJ_EXT): $(SRC)/IndexLog.cpp \
+	   		    $(HDR)/IndexLog.h
+
+$(OBJ)/2D/TestTypes2D.$(OBJ_EXT): $(SRC)/2D/TestTypes2D.cpp \
+				  $(HDR)/2D/TestTypes2D.h
+
+$(OBJ)/2D/TraceWriter2D.$(OBJ_EXT): $(SRC)/2D/TraceWriter2D.cpp \
+			      	    $(HDR)/2D/TraceWriter2D.h \
+			      	    $(HDR)/2D/TestTypes2D.h
+
+$(OBJ)/2D/Workload2D.$(OBJ_EXT): $(SRC)/2D/Workload2D.cpp $(HDR)/2D/Workload2D.h
+
+
+$(OBJ)/2D/Experiment2D.$(OBJ_EXT): $(SRC)/2D/Experiment2D.cpp \
+				   $(HDR)/2D/Experiment2D.h \
+			    	   $(HDR)/TimingResult.h
+
+$(OBJ)/2D/JoinRunner2D.$(OBJ_EXT): $(SRC)/2D/JoinRunner2D.cpp \
+				   $(HDR)/2D/JoinRunner2D.h \
+				   $(HDR)/2D/StaticJoinRunner2D.h \
+				   $(HDR)/2D/IncrementalJoinRunner2D.h \
+			    	   $(HDR)/TimingResult.h \
+			    	   $(HDR)/StaticJoinCallBack.h \
+			    	   $(HDR)/JoinCallBack.h \
+			    	   $(HDR)/IncrementalCallBack.h
+
+$(OBJ)/2D/StaticJoinRunner2D.$(OBJ_EXT): $(SRC)/2D/StaticJoinRunner2D.cpp \
+					 $(HDR)/2D/StaticJoinRunner2D.h \
+				   	 $(HDR)/IndexLog.h
+
+$(OBJ)/2D/IncrementalJoinRunner2D.$(OBJ_EXT): $(SRC)/2D/IncrementalJoinRunner2D.cpp \
+					      $(HDR)/2D/IncrementalJoinRunner2D.h \
+					      $(HDR)/IndexLog.h
+
+
+
+$(OBJ)/2D/workload/TraceWorkload2D.$(OBJ_EXT): \
+	$(SRC)/2D/workload/TraceWorkload2D.cpp \
+	$(HDR)/2D/TraceWriter2D.h \
+	$(HDR)/2D/workload/TraceWorkload2D.h
+
+
+$(OBJ)/2D/DataGenerator.$(OBJ_EXT): $(SRC)/2D/DataGenerator.cpp \
+				    $(HDR)/2D/DataGenerator.h
+
+$(OBJ)/2D/data_generator/UniformGenerator.$(OBJ_EXT): \
+	$(SRC)/2D/data_generator/UniformGenerator.cpp \
+	$(HDR)/2D/data_generator/UniformGenerator.h
+
+
+$(OBJ)/2D/data_generator/GaussianGenerator.$(OBJ_EXT): \
+	$(SRC)/2D/data_generator/GaussianGenerator.cpp \
+	$(HDR)/2D/data_generator/GaussianGenerator.h
+
+
+$(OBJ)/2D/data_generator/Network.$(OBJ_EXT): \
+	$(SRC)/2D/data_generator/Network.cpp \
+
+
+$(OBJ)/2D/data_generator/NetworkGenerator.$(OBJ_EXT): \
+	$(SRC)/2D/data_generator/NetworkGenerator.cpp \
+	$(HDR)/2D/data_generator/NetworkGenerator.h \
+	$(HDR)/2D/data_generator/Network.h
+
+
+
+$(OBJ)/2D/data_generator/fish/unit.$(OBJ_EXT): \
+	$(SRC)/2D/data_generator/fish/unit.cpp \
+	$(HDR)/2D/DataGenerator.h \
+	$(HDR)/2D/data_generator/fish/unit.h
+
+$(OBJ)/2D/data_generator/fish/oids.$(OBJ_EXT): \
+	$(SRC)/2D/data_generator/fish/oids.cpp \
+	$(HDR)/2D/data_generator/fish/oids.h
+
+
+$(OBJ)/2D/data_generator/FishGenerator.$(OBJ_EXT): \
+	$(SRC)/2D/data_generator/FishGenerator.cpp \
+	$(SRC)/2D/data_generator/fish/unit.cpp \
+	$(HDR)/2D/data_generator/FishGenerator.h \
+	$(HDR)/2D/DataGenerator.h \
+	$(HDR)/2D/data_generator/fish/oids.h \
+	$(HDR)/2D/data_generator/fish/FishRegion.h \
+	$(HDR)/2D/data_generator/fish/AggIndex2D_seminaive_def.h
+
+
+$(OBJ)/checkTrace.$(OBJ_EXT): $(SRC)/checkTrace.cpp
+
+
+
+#$(OBJ)/2D/experiment/ScaleNumPoints2D.$(OBJ_EXT): \
+# $(SRC)/2D/experiment/ScaleNumPoints2D.cpp \
+# $(HDR)/2D/experiment/ScaleNumPoints2D.h \
+# $(HDR)/2D/point_index/RTree2D.h \
+# $(HDR)/2D/point_index/CRTree2D.h \
+# $(HDR)/2D/point_index/BinarySearch2D.h \
+# $(HDR)/2D/workload/TraceWorkload2D.h
+
+
+# ----------------------------------------------------------------------
+# Main file: Add your structure here
+# ----------------------------------------------------------------------
+
+
+
+
+
+$(OBJ)/main.$(OBJ_EXT): $(SRC)/main.cpp \
+			$(HDR)/TimingResult.h \
+			$(HDR)/IndexLog.h \
+			$(HDR)/2D/TestTypes2D.h \
+			$(HDR)/2D/Workload2D.h \
+			$(HDR)/2D/Experiment2D.h \
+			$(HDR)/2D/TraceWriter2D.h \
+			$(HDR)/JoinCallBack.h \
+			$(HDR)/IncrementalCallBack.h \
+			$(HDR)/2D/workload/TraceWorkload2D.h \
+			$(HDR)/2D/point_index/NaiveSpatialIndex2D.h \
+			$(HDR)/2D/point_index/BinarySearch2D.h \
+			$(HDR)/2D/point_index/RTree.h \
+			$(HDR)/2D/point_index/CRTree.h \
+			$(HDR)/2D/point_index/Stripes.h \
+			$(HDR)/2D/point_index/TPRTree.h \
+			$(HDR)/2D/point_index/SimpleGrid.h \
+			$(HDR)/2D/point_index/NaiveMovingIndex2D.h \
+			$(HDR)/2D/point_index/LinearizedKDTrie.h \
+			$(HDR)/2D/join_index/StaticNestedLoops2D.h \
+			$(HDR)/2D/join_index/MovingNestedLoops2D.h \
+			$(HDR)/2D/join_index/GenericPlaneSweep2D.h \
+			$(HDR)/2D/join_index/ForwardPlaneSweep.h \
+			$(HDR)/2D/join_index/SynchTraversal.h \
+			$(HDR)/2D/continuous_join/AEJoin.h
+# Add new indexes here ===>
+
+
+
+$(OBJ)/datagen.$(OBJ_EXT): $(SRC)/datagen.cpp \
+			   $(HDR)/IndexLog.h \
+		   	   $(HDR)/2D/TraceWriter2D.h \
+			   $(HDR)/2D/DataGenerator.h \
+			   $(HDR)/2D/data_generator/UniformGenerator.h \
+			   $(HDR)/2D/data_generator/GaussianGenerator.h \
+			   $(HDR)/2D/data_generator/FishGenerator.h \
+		           $(HDR)/2D/data_generator/NetworkGenerator.h
+
+
+$(OBJ)/plot.$(OBJ_EXT): $(SRC)/plot.cpp \
+			$(HDR)/IndexLog.h \
+			$(HDR)/TimingResult.h
+
+
+$(OBJ)/fishtest.$(OBJ_EXT): $(SRC)/fishtest.cpp \
+			    $(HDR)/2D/data_generator/FishGenerator.h \
+			    $(HDR)/2D/data_generator/fish/unit.h
+
+
+
+$(TARGET_MAIN): $(OBJ)/util/AlignedMem.$(OBJ_EXT) \
+		$(OBJ)/util/ptimer.$(OBJ_EXT) \
+		$(OBJ)/util/RNG.$(OBJ_EXT) \
+		$(OBJ)/util/Log.$(OBJ_EXT) \
+		$(OBJ)/IndexLog.$(OBJ_EXT) \
+		$(OBJ)/TimingResult.$(OBJ_EXT) \
+		$(OBJ)/2D/TestTypes2D.$(OBJ_EXT) \
+	        $(OBJ)/2D/Workload2D.$(OBJ_EXT) \
+	        $(OBJ)/2D/Experiment2D.$(OBJ_EXT) \
+	        $(OBJ)/2D/JoinRunner2D.$(OBJ_EXT) \
+	        $(OBJ)/2D/StaticJoinRunner2D.$(OBJ_EXT) \
+	        $(OBJ)/2D/IncrementalJoinRunner2D.$(OBJ_EXT) \
+	        $(OBJ)/2D/TraceWriter2D.$(OBJ_EXT) \
+	        $(OBJ)/2D/workload/TraceWorkload2D.$(OBJ_EXT) \
+	        $(OBJ)/main.$(OBJ_EXT)
+
+
+
+$(TARGET_DATAGEN): $(OBJ)/util/AlignedMem.$(OBJ_EXT) \
+		   $(OBJ)/util/ptimer.$(OBJ_EXT) \
+		   $(OBJ)/util/RNG.$(OBJ_EXT) \
+		   $(OBJ)/util/Log.$(OBJ_EXT) \
+		   $(OBJ)/IndexLog.$(OBJ_EXT) \
+		   $(OBJ)/2D/TraceWriter2D.$(OBJ_EXT) \
+		   $(OBJ)/2D/TestTypes2D.$(OBJ_EXT) \
+		   $(OBJ)/2D/DataGenerator.$(OBJ_EXT) \
+                   $(OBJ)/2D/data_generator/UniformGenerator.$(OBJ_EXT) \
+                   $(OBJ)/2D/data_generator/GaussianGenerator.$(OBJ_EXT) \
+                   $(OBJ)/2D/data_generator/NetworkGenerator.$(OBJ_EXT) \
+                   $(OBJ)/2D/data_generator/Network.$(OBJ_EXT) \
+		   $(OBJ)/2D/data_generator/fish/unit.$(OBJ_EXT) \
+		   $(OBJ)/2D/data_generator/fish/oids.$(OBJ_EXT) \
+		   $(OBJ)/2D/data_generator/FishGenerator.$(OBJ_EXT) \
+	           $(OBJ)/datagen.$(OBJ_EXT)
+
+
+$(TARGET_PLOT): $(OBJ)/util/AlignedMem.$(OBJ_EXT) \
+		$(OBJ)/util/ptimer.$(OBJ_EXT) \
+		$(OBJ)/util/RNG.$(OBJ_EXT) \
+		$(OBJ)/util/Log.$(OBJ_EXT) \
+		$(OBJ)/IndexLog.$(OBJ_EXT) \
+	        $(OBJ)/TimingResult.$(OBJ_EXT) \
+	        $(OBJ)/plot.$(OBJ_EXT)
+
+
+$(TARGET_FISH):	$(OBJ)/util/AlignedMem.$(OBJ_EXT) \
+		$(OBJ)/util/ptimer.$(OBJ_EXT) \
+		$(OBJ)/util/RNG.$(OBJ_EXT) \
+		$(OBJ)/util/Log.$(OBJ_EXT) \
+		$(OBJ)/fishtest.$(OBJ_EXT) \
+		$(OBJ)/2D/data_generator/fish/unit.$(OBJ_EXT) \
+		$(OBJ)/2D/data_generator/fish/oids.$(OBJ_EXT) \
+	        $(OBJ)/2D/data_generator/FishGenerator.$(OBJ_EXT) \
+	        $(OBJ)/2D/Workload2D.$(OBJ_EXT) \
+	        $(OBJ)/2D/DataGenerator.$(OBJ_EXT) \
+		$(OBJ)/IndexLog.$(OBJ_EXT) \
+		$(OBJ)/2D/TestTypes2D.$(OBJ_EXT) \
+		$(OBJ)/2D/TraceWriter2D.$(OBJ_EXT)
+
+$(TARGET_CHECKTRACE): $(OBJ)/util/AlignedMem.$(OBJ_EXT) \
+		      $(OBJ)/util/ptimer.$(OBJ_EXT) \
+		      $(OBJ)/util/RNG.$(OBJ_EXT) \
+		      $(OBJ)/util/Log.$(OBJ_EXT) \
+		      $(OBJ)/checkTrace.$(OBJ_EXT) \
+		      $(OBJ)/IndexLog.$(OBJ_EXT) \
+	              $(OBJ)/2D/Workload2D.$(OBJ_EXT) \
+		      $(OBJ)/2D/workload/TraceWorkload2D.$(OBJ_EXT) \
+		      $(OBJ)/2D/TestTypes2D.$(OBJ_EXT) \
+		      $(OBJ)/2D/TraceWriter2D.$(OBJ_EXT)
+
+

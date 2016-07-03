@@ -1,0 +1,29 @@
+# clustered and stacked graph example w/ bogus data
+=stackcluster;Build;Query;Update
+=sortbmarks
+=nogridy
+=noupperright
+legendx=right
+legendy=center
+xlabel=Road Network
+ylabel=Time (s)
+
+=table
+multimulti=Oldenburg
+CRTree           4.827614 15.771837 0.366511 
+StripedSweep     2.577172 4.310796 0.198714 
+SynchTraversal   4.278263 5.461511 0.308690 
+TPRTree          2.159581 505.164707 16.626724 
+STRIPES          0.839068 822.094894 7.791508 
+multimulti=Singapore
+CRTree           4.873443 16.731912 0.373159 
+StripedSweep     2.576891 4.684225 0.204946 
+SynchTraversal   4.300407 6.088628 0.323608 
+TPRTree          4.607584 271.835655 27.208762 
+STRIPES          0.845047 1239.102347 8.676170 
+multimulti=San Francisco
+CRTree           4.924666 17.302109 0.418701 
+StripedSweep     2.601231 4.720403 0.250917 
+SynchTraversal   4.370185 6.056665 0.369882 
+TPRTree          4.004275 213.704096 90.092502 
+STRIPES          1.043059 1574.661414 13.563717 

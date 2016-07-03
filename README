@@ -1,0 +1,30 @@
+Prerequisites: 
+-------------
+The indexing framework can be built on run on Unix-like operating systems, including Linux and Mac OS X. It has been developed using Ubuntu and Mac OS X, but is likely to work on other distributions. It will NOT work on Windows at this time.
+
+The primary dependency is a relatively recent version of the g++ compiler. I don't know the oldest version that will work, but anything after 4.0.0 should be fine. 
+
+The Indexing framework also depends on the GNU Scientific Library (gsl) for a few random number generators. On Ubuntu, you can install this library using 
+
+    sudo apt-get install libgsl0-dev
+
+The command may be somewhat different in different Linux distributions. On a Mac (or Linux without a package manager) gsl can be downloaded and installed from source from http://ftpmirror.gnu.org/gsl/. 
+
+Compiling:
+---------
+The project can be compiled using make. You can use the 'debug' or 'opt' targets to enable/disable debugging. When the opt target is specified, all asserts will be turned off at compile time. 
+
+
+Simple Usage:
+------------
+All commands must be run from the main indexing directory. 
+
+
+# Runs the RTree on several standard traces and compares the output to a naive implementation. Reports any differences for debugging. 
+  ./bin/index.exec test --name=RTree
+
+# Runs the RTree index on the workload specified by the trace file 'small_trace.txt'
+  ./bin/index.exec run --name=RTree --trace=traces/small_trace.txt
+
+# Runs the experiment specified in include/experiments/StaticIndex/StaticIndexScalePoints.h
+  ./bin/index.exec experiment --name=StaticIndexScalePoints
