@@ -82,11 +82,19 @@ namespace PSimIndex {
 
                 index->enumerateOverRegion(&icb, &r);
 
+//                for(iit = icb.begin(); iit != icb.end(); iit++) {
+//                    if(K::getOID(*it) != K::getOID(*iit)) {
+//                        LOG(DEBUG) << (**it) << " " << (**iit) << std::endl;
+//                        cb->reportPair(*it, *iit);
+//                    }
+//                }
                 for(iit = icb.begin(); iit != icb.end(); iit++) {
-                    if(K::getOID(*it) != K::getOID(*iit)) {
+                   // if(K::getOID(*it) != K::getOID(*iit)) {
                         LOG(DEBUG) << (**it) << " " << (**iit) << std::endl;
+                       // std::cout << (**it) << " " << (**iit) << std::endl;
+
                         cb->reportPair(*it, *iit);
-                    }
+                 //   }
                 }
                 icb.clear();
             }

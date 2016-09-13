@@ -334,6 +334,7 @@ long TimingResult::getTrialNumResults(int trial) {
 double TimingResult::getAvgTrialNumResults() {
     double avg = 0.0;
     for(int i = 0; i < trials.size(); i++) {
+    	std::cout<< getTrialNumResults(i)<< "\n";
         avg += getTrialNumResults(i);
     }
     return (avg / trials.size());

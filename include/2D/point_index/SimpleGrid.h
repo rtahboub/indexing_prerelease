@@ -380,33 +380,56 @@ namespace PSimIndex {
     	//prune disqualified grid cells
     	int x1, x2, y1, y2;
     	x1 = r->getLow0()/cellSize;
-    	y1 = r->getHigh0()/cellSize;
-    	x2 = r->getLow1()/cellSize;
+    	x2 = r->getHigh0()/cellSize;
+    	y1 = r->getLow1()/cellSize;
     	y2 = r->getHigh1()/cellSize;
-
-    	//std::cout<< *r<< " " << x1 << " " << y1 << " " << x2 << " " << y2 <<"\n";
 
     	if(x1 == x2 && y1 == y2){
 
     		RType* rect = new RType(cellSize*x1, cellSize*(x1+1), cellSize*y1, cellSize*(y1+1));
 
-    		    				if(r->contains(rect)) {
-    		    					// fully covered
-    		    			    	getCell(x1,y1)->addAllPoints(cb);
-    		    			    } else if(r->intersects(rect)) {
+    		if(r->contains(rect)) {
+				// fully covered
+				getCell(x1,y1)->addAllPoints(cb);
+    		} else if(r->intersects(rect)) {
+    			getCell(x1,y1)->enumerateOverRegion(cb, r);
+    		}
+    	delete rect;
+    	DBUTL_ASSERT(getCell(x1,y1) != NULL);
 
-    		    			    	getCell(x1,y1)->enumerateOverRegion(cb, r);
-    		    			    }
-    		    			    delete rect;
-    		    			    DBUTL_ASSERT(getCell(x1,y1) != NULL);
+    	}else if(x1 == x2 && y2 > y1){
+    		for (int i=y1; i<=y2; i++){
+    			RType* rect = new RType(cellSize*x1, cellSize*(x1+1), cellSize*i, cellSize*(i+1));
+    			if(r->contains(rect)) {
+    			// fully covered
+    			getCell(x1,i)->addAllPoints(cb);
+    			} else if(r->intersects(rect)) {
+    				getCell(x1,i)->enumerateOverRegion(cb, r);
+    			}
+    			delete rect;
+    			DBUTL_ASSERT(getCell(x1,i) != NULL);
+    		}
+    	}
 
-    	}else{
+    	else if(y1 == y2 && x2 > x1){
+    		for(int i=x1; i<=x2; i++){
+    			RType* rect = new RType(cellSize*i, cellSize*(i+1), cellSize*y1, cellSize*(y1+1));
+    			if(r->contains(rect)) {
+					// fully covered
+					getCell(i,y1)->addAllPoints(cb);
+				} else if(r->intersects(rect)) {
+					getCell(i,y1)->enumerateOverRegion(cb, r);
+    			}
+    			delete rect;
+    			DBUTL_ASSERT(getCell(i,y1) != NULL);
+    		}
+    	}
+    	else{
 
-			for(int i = x2; i <= x2-x1; i++){
+			for(int i = x1; i <= x2-x1; i++){
 				for (int j = y1; j <= y2-y1; j++){
 					RType* rect = new RType(cellSize*i, cellSize*(i+1), cellSize*j, cellSize*(j+1));
-					if ( x1==1 && y1==1 && x2==1 && y2==1)
-						std::cout<< "here "<< *r << " " <<*rect<< "\n";
+
 						if(r->contains(rect)) {
 							// fully covered
 							getCell(i,j)->addAllPoints(cb);
@@ -421,7 +444,6 @@ namespace PSimIndex {
 			}
     	}
 
-
 //        for(int i = 0; i < cellsPerSide; ++i) {
 //            for(int j = 0; j < cellsPerSide; ++j) {
 //
@@ -429,10 +451,12 @@ namespace PSimIndex {
 //                RType* rect = new RType(cellSize*i, cellSize*(i+1), cellSize*j, cellSize*(j+1));
 //
 //                if(r->contains(rect)) {
+//    //            	std::cout<<"contains " << i << " " << j << " " << *rect << " " << *r << std::endl;
 //                    // fully covered
 //                    getCell(i,j)->addAllPoints(cb);
 //                }
 //                else if(r->intersects(rect)) {
+////                	std::cout<<"intersects " << i << " " << j << " " << *rect << " " << *r << std::endl;
 //                    getCell(i,j)->enumerateOverRegion(cb, r);
 //                }
 //                delete rect;

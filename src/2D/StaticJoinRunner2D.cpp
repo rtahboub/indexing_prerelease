@@ -301,7 +301,7 @@ void StaticJoinRunner2D::runTick(JoinCallBack<Key2D,Point2D,Point2D>* cb) {
    // std::cout << (finishbuild - startbuild)/ CLOCKS_PER_SEC;
 //	std::cout		<< " \n";
     auto finishbuild = std::chrono::high_resolution_clock::now();
-    std::cout << "build time " << std::chrono::duration_cast<std::chrono::milliseconds>(finishbuild-var).count()<< " milliseconds\n";
+    std::cout << "build time " << std::chrono::duration_cast<std::chrono::nanoseconds>(finishbuild-var).count()<< " nanoseconds\n";
 
     auto startquery = std::chrono::high_resolution_clock::now();
 //    clock_t startquery = clock();
@@ -310,7 +310,7 @@ void StaticJoinRunner2D::runTick(JoinCallBack<Key2D,Point2D,Point2D>* cb) {
 //    std::cout << "query time " << (finishquery - startquery)/ CLOCKS_PER_SEC << " \n";
 
     auto finishquery = std::chrono::high_resolution_clock::now();
-    std::cout << "query time " << std::chrono::duration_cast<std::chrono::milliseconds>(finishquery-startquery).count()<< " milliseconds\n";
+    std::cout << "query time " << std::chrono::duration_cast<std::chrono::nanoseconds>(finishquery-startquery).count()<< " nanoseconds\n";
 
     int numResults = cb->numPairs();
 

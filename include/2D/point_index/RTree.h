@@ -102,9 +102,10 @@ namespace PSimIndex {
 
             friend std::ostream& operator<<(std::ostream &out, 
                                             const Node& node) {
-                out << "RTree::Node(" << std::setiosflags(std::ios::fixed) 
+                out << "RTree::Node("
+                		<< std::setiosflags(std::ios::fixed)
                     << std::setprecision(2)
-                    << (node.isLeaf() ? "leaf" : "internal") << ", " 
+                    << (node.isLeaf() ? "leaf" : "internal") << ", "
                     << node.getCount();
             }
         };
