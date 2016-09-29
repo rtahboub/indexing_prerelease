@@ -377,7 +377,7 @@ namespace PSimIndex {
 
         if (internalNodes.size() == 1) {
             root = internalNodes[0];
-         //   printSubtree(root);
+            printSubtree(root);
         } else {
             LOG(DEBUG) << "Building a new level, the  number of nodes is: "
                        << internalNodes.size() << std::endl;
