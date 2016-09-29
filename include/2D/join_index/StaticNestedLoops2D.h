@@ -57,7 +57,7 @@ namespace PSimIndex {
 
         //	std::cout << "HERE here" << std::endl;
 
-//            std::cout << "HERE" << std::endl;
+            //std::cout << "HERE" << std::endl;
 
             typename std::vector<U*>::const_iterator it;
             typename IndexCallBack<U>::iterator iit;

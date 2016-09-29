@@ -60,7 +60,7 @@ namespace PSimIndex {
             static int nodeAllocs;
             static int nodeDeallocs;
 
-        private:
+      //  private:
             union Ptr {
                 Node* childPtr;
                 U* data;
@@ -315,6 +315,8 @@ namespace PSimIndex {
         }
         RType newR(min0, max0, min1, max1);
 
+       // std::cout<< min0 << " " << max0 << " " << min1 << " "<< max1 <<"\n";
+
         return newR;
     }
 
@@ -375,6 +377,7 @@ namespace PSimIndex {
 
         if (internalNodes.size() == 1) {
             root = internalNodes[0];
+         //   printSubtree(root);
         } else {
             LOG(DEBUG) << "Building a new level, the  number of nodes is: "
                        << internalNodes.size() << std::endl;
@@ -429,6 +432,7 @@ namespace PSimIndex {
         // unsigned int S = sqrt(P);
 
         uint32_t numInLeaf = (uint32_t)(fillFactor * maxEntries);
+        std::cout << "bulk "<<fillFactor << " " << maxEntries << "table size = " << agents->size() << std::endl;
         uint32_t P = ceil((double)(agents->size()) / numInLeaf); 
         uint32_t S = sqrt(P);
 
@@ -466,12 +470,21 @@ namespace PSimIndex {
 
         std::sort(agents->begin() + i, agents->end(), dim1lt<U,K>);
 
+//        std::cout<<"agent size = " <<agents->size()<<"\n";
+//        int abc = 0;
+//        for(; abc < agents->size(); abc++ ){
+//        	std::cout<< K::getOID((*agents)[abc]) << "," <<K::getKey0((*agents)[abc]) << "," << K::getKey1((*agents)[abc]) <<"\n";
+//
+//
+//        }
+
         std::vector<Node*> tempNodes;
 
         // build all the leaf nodes
         i = 0;
         //for (; i < (int)agents->size() - maxEntries; i += maxEntries) {
         for (; i < (int)agents->size() - (int)numInLeaf; i += numInLeaf) {
+       // 	std::cout<<"i = " << i << "\n";
             Node* leaf = new Node(maxEntries, true);
 
             // calcuate MBR for each entry
@@ -486,7 +499,7 @@ namespace PSimIndex {
 
             }
             tempNodes.push_back(leaf);
-            LOG(DEBUG) << "Built leaf: " << *leaf << std::endl;
+//            LOG(DEBUG) << "Built leaf: " << *leaf << std::endl;
         }
         Node* leaf = new Node(maxEntries, true);
         bool added = false;
@@ -508,12 +521,14 @@ namespace PSimIndex {
 
         if (added) {
             tempNodes.push_back(leaf);
-            LOG(DEBUG) << "Built leaf: " << *leaf << std::endl;
+ //           LOG(DEBUG) << "Built leaf: " << *leaf << std::endl;
         }
         else {
             //std::cout << "delete 2";
             delete leaf;
         }
+
+        std::cout<< "number of leaf nodes" <<tempNodes.size() << "\n";
 
         // build the tree bottom up
         build(tempNodes);
@@ -527,6 +542,7 @@ namespace PSimIndex {
     template<typename U, typename K, typename A>
     template<typename RG>
     void RTree<U,K,A>::bulkLoadQueries(std::vector<U*>* queryPoints, RG* rg) {
+    	std::cout<<"************inside bulk queries\n";
         root = NULL;
         if(queryPoints->size() == 0) return;
 
@@ -644,9 +660,13 @@ namespace PSimIndex {
         if (node->isLeaf()) {
             /*LOG(DEBUG)*/std::cout << "\tLeaf: " << *node << ": " << std::endl;
             for (int i = 0; i < node->getCount(); i++) {
-                /*LOG(DEBUG)*/std::cout << "\t\t\t" << *((node->entries[i]).data)
-                                        << " " << node->entries[i].mbr
-                                        << std::endl;
+//                /*LOG(DEBUG)*/std::cout << "\t\t\t" << *((node->entries[i]).data)
+//                                        << " " << node->entries[i].mbr
+//                                        << std::endl;
+
+            	std::cout << "\t\t\t" << *((node->ptrs[i]).data)
+            	                                        << " " << node->mbrs[i]
+            	                                        << std::endl;
             }
             return;
         }
@@ -655,9 +675,11 @@ namespace PSimIndex {
 
         std::vector<Node* > nodes;
         for (int i = 0; i < node->getCount(); i++) {
-            Node* child = (node->entries[i]).childPtr;
+            //Node* child = (node->entries[i]).childPtr;
+        	Node* child = (node->ptrs[i]).childPtr;
             nodes.push_back(child);
-            /*LOG(DEBUG)*/std::cout << "\t\t" << *child << "<--->" << (node->entries[i]).mbr << std::endl;
+            /*LOG(DEBUG)*///std::cout << "\t\t" << *child << "<--->" << (node->entries[i]).mbr << std::endl;
+            /*LOG(DEBUG)*/std::cout << "\t\t" << *child << "<--->" << node->mbrs[i] << std::endl;
         }
 
         /*LOG(DEBUG)*/std::cout << "---------------------------------------------------"
